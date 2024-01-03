@@ -10,14 +10,14 @@ locals {
   containers_master = [
     {
       name         = "container-${var.env}-k3s-m1"
-      ipv4_address = "10.0.20.11"
+      ipv4_address = "10.20.0.11"
       profiles     = local.container_profiles
     }
   ]
   containers_worker = [
     {
       name         = "container-${var.env}-k3s-w1"
-      ipv4_address = "10.0.20.21"
+      ipv4_address = "10.20.0.21"
       profiles     = local.container_profiles
     }
   ]
@@ -33,8 +33,8 @@ module "lxd_k3s_cluster" {
   swarm_private_key = var.swarm_private_key
   cluster_domain    = local.cluster_domain
   nicparent         = "${var.env}-network"
-  cidr_pods         = "10.0.20.64/26"
-  cidr_services     = "10.0.20.128/25"
+  cidr_pods         = "10.20.1.0/22"
+  cidr_services     = "10.20.5.0/22"
   containers_master = local.containers_master
   containers_worker = local.containers_worker
   autostart         = true
