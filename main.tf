@@ -33,8 +33,8 @@ module "lxd_k3s_cluster" {
   swarm_private_key = var.swarm_private_key
   cluster_domain    = local.cluster_domain
   nicparent         = "${var.env}-network"
-  cidr_pods         = "10.21.0.0/16"
-  cidr_services     = "10.22.0.0/16"
+  cidr_pods         = "10.0.20.64/26"
+  cidr_services     = "10.0.20.128/25"
   containers_master = local.containers_master
   containers_worker = local.containers_worker
   autostart         = true
