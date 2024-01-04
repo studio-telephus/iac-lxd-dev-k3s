@@ -39,11 +39,9 @@ module "lxd_k3s_cluster" {
   k3s_install_env_vars = {
     "K3S_KUBECONFIG_MODE" = "644"
   }
-  global_flags = [
-    "--tls-san ${local.tls_san}"
-  ]
   master_flags = [
-    "--flannel-backend=none"
+    "--flannel-backend=none",
+    "--tls-san ${local.tls_san}"
   ]
   containers_master = local.containers_master
   containers_worker = local.containers_worker
