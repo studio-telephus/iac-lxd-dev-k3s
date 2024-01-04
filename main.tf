@@ -40,7 +40,6 @@ module "lxd_k3s_cluster" {
     "K3S_KUBECONFIG_MODE" = "644"
   }
   master_flags = [
-    "--flannel-backend=none",
     "--tls-san ${local.tls_san}"
   ]
   containers_master = local.containers_master
