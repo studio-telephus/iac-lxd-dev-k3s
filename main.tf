@@ -29,12 +29,19 @@ module "lxd_k3s_privileged_profile" {
 }
 
 module "lxd_k3s_cluster" {
-  source            = "github.com/studio-telephus/terraform-lxd-k3s-cluster.git?ref=1.0.0"
+  source            = "github.com/studio-telephus/terraform-lxd-k3s-cluster.git?ref=main"
   swarm_private_key = var.swarm_private_key
   cluster_domain    = local.cluster_domain
   nicparent         = "${var.env}-network"
-  cidr_pods         = "10.20.1.0/22"
-  cidr_services     = "10.20.5.0/22"
+  cidr_pods         = "10.20.10.0/22"
+  cidr_services     = "10.20.15.0/22"
+  global_flags = [
+    "--write-kubeconfig-mode 644",
+    "--disable=traefik",
+    "--kube-controller-manager-arg bind-address=0.0.0.0",
+    "--kube-proxy-arg metrics-bind-address=0.0.0.0",
+    "--kube-scheduler-arg bind-address=0.0.0.0"
+  ]
   containers_master = local.containers_master
   containers_worker = local.containers_worker
   autostart         = true
