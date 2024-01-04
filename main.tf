@@ -1,5 +1,6 @@
 locals {
-  cluster_domain          = "k3s-cluster.${var.env}.acme.corp"
+  cluster_domain   = "cluster.local"
+  tls_san          = "k3s-cluster.${var.env}.acme.corp"
   profile_privileged_name = "k3s-privileged-${var.env}"
   container_profiles = [
     "limits",
@@ -35,14 +36,14 @@ module "lxd_k3s_cluster" {
   nicparent         = "${var.env}-network"
   cidr_pods         = "10.20.10.0/22"
   cidr_services     = "10.20.15.0/22"
+  k3s_install_env_vars = {
+    "K3S_KUBECONFIG_MODE" = "644"
+  }
   global_flags = [
-    "--write-kubeconfig-mode 644",
-    "--disable=traefik",
-    "--kube-proxy-arg metrics-bind-address=0.0.0.0",
-    "--kube-controller-manager-arg address=0.0.0.0",
-    "--kube-controller-manager-arg bind-address=0.0.0.0",
-    "--kube-scheduler-arg bind-address=0.0.0.0",
-    "--kube-scheduler-arg address=0.0.0.0"
+    "--tls-san ${local.tls_san}"
+  ]
+  master_flags = [
+    "--flannel-backend=none"
   ]
   containers_master = local.containers_master
   containers_worker = local.containers_worker
