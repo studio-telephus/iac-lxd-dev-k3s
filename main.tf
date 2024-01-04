@@ -1,6 +1,6 @@
 locals {
   cluster_domain   = "cluster.local"
-  tls_san          = "k3s-cluster.${var.env}.acme.corp"
+  cluster_lb_san          = "k3s-cluster.${var.env}.acme.corp"
   profile_privileged_name = "k3s-privileged-${var.env}"
   container_profiles = [
     "limits",
@@ -40,7 +40,7 @@ module "lxd_k3s_cluster" {
     "K3S_KUBECONFIG_MODE" = "644"
   }
   master_flags = [
-    "--tls-san ${local.tls_san}"
+    "--tls-san ${local.containers_master[0].ipv4_address}"
   ]
   containers_master = local.containers_master
   containers_worker = local.containers_worker
