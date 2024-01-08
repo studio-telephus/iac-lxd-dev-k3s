@@ -1,6 +1,5 @@
 locals {
   cluster_domain          = "cluster.local"
-  cluster_alb_san         = "k3s-alb.${var.env}.acme.corp"
   profile_privileged_name = "k3s-privileged-${var.env}"
   nicparent               = "${var.env}-network"
   container_profiles = [
@@ -14,16 +13,16 @@ locals {
       ipv4_address = "10.20.0.11"
       profiles     = concat(local.container_profiles, [local.profile_privileged_name])
     }
-//    {
-//      name         = "container-${var.env}-k3s-s2"
-//      ipv4_address = "10.20.0.12"
-//      profiles     = concat(local.container_profiles, [local.profile_privileged_name])
-//    },
-//    {
-//      name         = "container-${var.env}-k3s-s3"
-//      ipv4_address = "10.20.0.13"
-//      profiles     = concat(local.container_profiles, [local.profile_privileged_name])
-//    }
+    //    {
+    //      name         = "container-${var.env}-k3s-s2"
+    //      ipv4_address = "10.20.0.12"
+    //      profiles     = concat(local.container_profiles, [local.profile_privileged_name])
+    //    },
+    //    {
+    //      name         = "container-${var.env}-k3s-s3"
+    //      ipv4_address = "10.20.0.13"
+    //      profiles     = concat(local.container_profiles, [local.profile_privileged_name])
+    //    }
   ]
   fixed_registration_ip = "10.20.0.31"
   external_ip           = "10.20.0.32"
@@ -51,16 +50,22 @@ locals {
   ]
 }
 
+resource "random_password" "haproxy_stats_auth_password" {
+  length  = 12
+  special = true
+}
+
 module "container_loadbalancer" {
-  count        = length(local.containers_loadbalancer)
-  source       = "github.com/studio-telephus/terraform-lxd-haproxy.git?ref=main"
-  name         = local.containers_loadbalancer[count.index].name
-  profiles     = local.containers_loadbalancer[count.index].profiles
-  ipv4_address = local.containers_loadbalancer[count.index].ipv4_address
-  bind_port    = local.containers_loadbalancer[count.index].bind_port
-  servers      = local.containers_loadbalancer[count.index].servers
-  nicparent    = local.nicparent
-  autostart    = var.autostart
+  count               = length(local.containers_loadbalancer)
+  source              = "github.com/studio-telephus/terraform-lxd-haproxy.git?ref=1.0.0"
+  name                = local.containers_loadbalancer[count.index].name
+  profiles            = local.containers_loadbalancer[count.index].profiles
+  ipv4_address        = local.containers_loadbalancer[count.index].ipv4_address
+  bind_port           = local.containers_loadbalancer[count.index].bind_port
+  servers             = local.containers_loadbalancer[count.index].servers
+  nicparent           = local.nicparent
+  autostart           = var.autostart
+  stats_auth_password = random_password.haproxy_stats_auth_password.result
 }
 
 module "lxd_k3s_privileged_profile" {
@@ -83,7 +88,7 @@ module "lxd_k3s_cluster" {
   ]
   containers_server = local.containers_server
   autostart         = var.autostart
-  depends_on        = [
+  depends_on = [
     module.lxd_k3s_privileged_profile,
     module.container_loadbalancer[0]
   ]
