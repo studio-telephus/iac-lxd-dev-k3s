@@ -50,11 +50,6 @@ locals {
   ]
 }
 
-resource "random_password" "haproxy_stats_auth_password" {
-  length  = 12
-  special = true
-}
-
 module "container_loadbalancer" {
   count               = length(local.containers_loadbalancer)
   source              = "github.com/studio-telephus/terraform-lxd-haproxy.git?ref=1.0.0"
@@ -65,7 +60,7 @@ module "container_loadbalancer" {
   servers             = local.containers_loadbalancer[count.index].servers
   nicparent           = local.nicparent
   autostart           = var.autostart
-  stats_auth_password = random_password.haproxy_stats_auth_password.result
+  stats_auth_password = module.bw_haproxy_stats.data.password
 }
 
 module "lxd_k3s_privileged_profile" {
@@ -75,7 +70,7 @@ module "lxd_k3s_privileged_profile" {
 
 module "lxd_k3s_cluster" {
   source            = "github.com/studio-telephus/terraform-lxd-k3s-embedded.git?ref=1.0.0"
-  swarm_private_key = var.swarm_private_key
+  swarm_private_key = module.bw_swarm_private_key.data.notes
   cluster_domain    = local.cluster_domain
   nicparent         = "${var.env}-network"
   cidr_pods         = "10.20.10.0/22"
