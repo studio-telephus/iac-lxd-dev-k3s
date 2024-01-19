@@ -74,7 +74,7 @@ module "lxd_k3s_privileged_profile" {
 }
 
 module "lxd_k3s_cluster" {
-  source            = "github.com/studio-telephus/terraform-lxd-k3s-embedded.git?ref=main"
+  source            = "github.com/studio-telephus/terraform-lxd-k3s-embedded.git?ref=1.0.0"
   swarm_private_key = var.swarm_private_key
   cluster_domain    = local.cluster_domain
   nicparent         = "${var.env}-network"
@@ -84,6 +84,7 @@ module "lxd_k3s_cluster" {
     "K3S_KUBECONFIG_MODE" = "644"
   }
   server_flags = [
+    "--disable local-storage",
     "--tls-san ${local.fixed_registration_ip}"
   ]
   containers_server = local.containers_server
@@ -94,7 +95,7 @@ module "lxd_k3s_cluster" {
   ]
 }
 
-resource "local_file" "kube_config" {
+resource "local_sensitive_file" "kube_config" {
   content    = module.lxd_k3s_cluster.k3s_kube_config
   filename   = var.kube_config_path
   depends_on = [module.lxd_k3s_cluster]

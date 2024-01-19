@@ -14,3 +14,10 @@ Then
     su - gitlab-runner
     kubectl get pods --all-namespaces
 
+(Optional) Expose port for public access (Spacelift etc.)
+
+    iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 49632 -j DNAT --to-destination 10.20.0.31:6443
+
+List
+
+    iptables -t nat -v -L -n --line-number
